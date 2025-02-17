@@ -51,7 +51,7 @@ class SearxNGSearchTool:
 
     async def handle_request(
         self, name: str, arguments: Dict[str, Any]
-    ) -> types.CallToolResult:
+    ) -> List[types.TextContent]:
         """Handle search request."""
         try:
             params = SearchParams(**arguments)
@@ -72,12 +72,12 @@ class SearxNGSearchTool:
             )
 
             return [
-                types.TextContent(type="text", text=summary),
-                types.TextContent(type="text", text="\n\n" + "\n".join(result_texts)),
+                types.TextContent(text=summary, type="text"),
+                types.TextContent(text="\n\n" + "\n".join(result_texts), type="text"),
             ]
 
         except Exception as e:
-            return [types.TextContent(type="text", text=f"Search failed: {str(e)}")]
+            return [types.TextContent(text=f"Search failed: {str(e)}", type="text")]
 
     async def close(self) -> None:
         """Clean up resources."""

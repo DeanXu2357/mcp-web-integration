@@ -12,7 +12,5 @@ class SearxNGConfig:
     @classmethod
     def from_env(cls) -> "SearxNGConfig":
         """Create config from environment variables."""
-        base_url = os.getenv("SEARXNG_URL")
-        if not base_url:
-            raise ValueError("SEARXNG_URL environment variable is required")
+        base_url = os.getenv("SEARXNG_URL", "http://localhost:8080")
         return cls(base_url=base_url)
