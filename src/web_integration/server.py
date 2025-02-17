@@ -29,14 +29,11 @@ async def handle_list_tools() -> list[types.Tool]:
 
 
 @app.call_tool()
-async def handle_call_tool(name: str, arguments: dict | None) -> dict:
+async def handle_call_tool(name: str, arguments: dict | None) -> types.CallToolResult:
     """Handle tool call request."""
     if searxng_tool and name == "searxng_search":
         if not arguments or "query" not in arguments:
-            raise McpError(
-                types.INVALID_PARAMS,
-                "Missing required parameter: 'query'"
-            )
+            raise McpError(types.INVALID_PARAMS, "Missing required parameter: 'query'")
         return await searxng_tool.handle_request(name, arguments)
     raise McpError(types.METHOD_NOT_FOUND, "Tool not found")
 

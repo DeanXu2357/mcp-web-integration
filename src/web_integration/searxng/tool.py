@@ -34,7 +34,7 @@ class SearxNGSearchTool:
                         "description": "Search query string",
                     },
                     "limit": {
-                        "type": "number", 
+                        "type": "number",
                         "description": "Number of results (1-50, default 3)",
                         "default": 3,
                         "minimum": 1,
@@ -42,7 +42,7 @@ class SearxNGSearchTool:
                     },
                     "time_range": {
                         "type": "string",
-                        "description": "Time range filter",
+                        "description": "Time range filter. Filter data from selected time range to now",
                         "enum": ["day", "week", "month", "year"],
                     },
                 },
@@ -51,7 +51,7 @@ class SearxNGSearchTool:
 
     async def handle_request(
         self, name: str, arguments: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    ) -> types.CallToolResult:
         """Handle search request."""
         try:
             params = SearchParams(**arguments)
@@ -71,19 +71,13 @@ class SearxNGSearchTool:
                 f"(showing top {len(search_response.results)})"
             )
 
-            return {
-                "content": [
-                    {"type": "text", "text": summary},
-                    {"type": "text", "text": "\n\n" + "\n".join(result_texts)},
-                ],
-                "isError": False,
-            }
+            return [
+                types.TextContent(type="text", text=summary),
+                types.TextContent(type="text", text="\n\n" + "\n".join(result_texts)),
+            ]
 
         except Exception as e:
-            return {
-                "content": [{"type": "text", "text": f"Search failed: {str(e)}"}],
-                "isError": True,
-            }
+            return [types.TextContent(type="text", text=f"Search failed: {str(e)}")]
 
     async def close(self) -> None:
         """Clean up resources."""
