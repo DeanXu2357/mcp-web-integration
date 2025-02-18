@@ -1,5 +1,6 @@
 """Core crawling functionality for Crawl4AI integration."""
 
+import json
 import httpx
 from typing import Dict, Any
 from .config import Crawl4AIConfig

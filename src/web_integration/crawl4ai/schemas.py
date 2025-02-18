@@ -23,6 +23,11 @@ class Link(BaseModel):
     text: str = Field(..., description="Link text content")
     title: Optional[str] = Field(None, description="Link title attribute")
 
+    def __getitem__(self, key: str) -> Any:
+        """Support dictionary-style access to link attributes."""
+        return getattr(self, key)
+
+
 class CrawlResult(BaseModel):
     """Single crawl result."""
 

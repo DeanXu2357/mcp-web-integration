@@ -52,32 +52,28 @@ class SearxNGSearchTool:
     async def handle_request(
         self, name: str, arguments: Dict[str, Any]
     ) -> List[types.TextContent]:
-        """Handle search request."""
-        try:
-            params = SearchParams(**arguments)
-            search_response = await self.searcher.search(params)
 
-            # Format results in a user-friendly way
-            result_texts = []
-            for idx, result in enumerate(search_response.results, 1):
-                result_texts.append(
-                    f"{idx}. {result.title}\n"
-                    f"URL: {result.url}\n"
-                    f"Description: {result.snippet}\n"
-                )
+        params = SearchParams(**arguments)
+        search_response = await self.searcher.search(params)
 
-            summary = (
-                f"Found {search_response.total_count} results "
-                f"(showing top {len(search_response.results)})"
+        # Format results in a user-friendly way
+        result_texts = []
+        for idx, result in enumerate(search_response.results, 1):
+            result_texts.append(
+                f"{idx}. {result.title}\n"
+                f"URL: {result.url}\n"
+                f"Description: {result.snippet}\n"
             )
 
-            return [
-                types.TextContent(text=summary, type="text"),
-                types.TextContent(text="\n\n" + "\n".join(result_texts), type="text"),
-            ]
+        summary = (
+            f"Found {search_response.total_count} results "
+            f"(showing top {len(search_response.results)})"
+        )
 
-        except Exception as e:
-            return [types.TextContent(text=f"Search failed: {str(e)}", type="text")]
+        return [
+            types.TextContent(text=summary, type="text"),
+            types.TextContent(text="\n\n" + "\n".join(result_texts), type="text"),
+        ]
 
     async def close(self) -> None:
         """Clean up resources."""

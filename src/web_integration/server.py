@@ -35,29 +35,22 @@ async def handle_list_tools() -> list[types.Tool]:
 
 
 @app.call_tool()
-async def handle_call_tool(
-    name: str, arguments: dict | None
-) -> Sequence[types.TextContent]:
+async def handle_call_tool(name: str, arguments: dict | None) -> types.CallToolResult:
     if arguments is None:
         arguments = {}
 
-    try:
-        """Handle tool call request."""
-        if name == "searxng_search" and searxng_tool:
-            if not arguments or "query" not in arguments:
-                error_msg = "Missing required parameter: 'query'"
-                return [types.TextContent(text=error_msg, type="text")]
-            return await searxng_tool.handle_request(name, arguments)
+    """Handle tool call request."""
+    if name == "searxng_search" and searxng_tool:
+        if not arguments or "query" not in arguments:
+            error_msg = "Missing required parameter: 'query'"
+            raise ValueError(f"{error_msg}")
+        return await searxng_tool.handle_request(name, arguments)
 
-        if name == "crawl4ai_extract" and crawl4ai_tool:
-            if not arguments or "url" not in arguments:
-                error_msg = "Missing required parameter: 'url'"
-                return [types.TextContent(text=error_msg, type="text")]
-            return await crawl4ai_tool.handle_request(name, arguments)
-
-    except Exception as e:
-        error_msg = f"Tool {name} failed with error: {e}"
-        return [types.TextContent(text=error_msg, type="text")]
+    if name == "crawl4ai_extract" and crawl4ai_tool:
+        if not arguments or "url" not in arguments:
+            error_msg = "Missing required parameter: 'url'"
+            raise ValueError(f"{error_msg}")
+        return await crawl4ai_tool.handle_request(name, arguments)
 
     raise ValueError(f"Unknown tool: {name}")
 
