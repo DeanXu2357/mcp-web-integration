@@ -39,8 +39,6 @@ class Crawl4AICrawler:
         # Add optional parameters from config if set
         if self.config.wait_for:
             request_data["wait_for"] = self.config.wait_for
-        if self.config.wait_time:
-            request_data["wait_time"] = self.config.wait_time
         if self.config.js_code:
             request_data["js_code"] = self.config.js_code
 
