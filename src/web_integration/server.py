@@ -14,10 +14,12 @@ from mcp.types import ErrorData
 
 from web_integration.searxng import SearxNGSearchTool
 from web_integration.crawl4ai import Crawl4AITool
+from web_integration.youtube import YouTubeTranscriptTool
 
 # Global instances for tools
 searxng_tool = None
 crawl4ai_tool = None
+youtube_tool = None
 
 # Initialize server with name
 app = Server("mcp-web-integration")
@@ -31,6 +33,8 @@ async def handle_list_tools() -> list[types.Tool]:
         tools.append(searxng_tool.tool_definition)
     if crawl4ai_tool:
         tools.append(crawl4ai_tool.tool_definition)
+    if youtube_tool:
+        tools.append(youtube_tool.tool_definition)
     return tools
 
 
@@ -51,6 +55,12 @@ async def handle_call_tool(name: str, arguments: dict | None) -> types.CallToolR
             error_msg = "Missing required parameter: 'url'"
             raise ValueError(f"{error_msg}")
         return await crawl4ai_tool.handle_request(name, arguments)
+        
+    if name == "youtube_transcript" and youtube_tool:
+        if not arguments or "url" not in arguments:
+            error_msg = "Missing required parameter: 'url'"
+            raise ValueError(f"{error_msg}")
+        return await youtube_tool.handle_request(name, arguments)
 
     raise ValueError(f"Unknown tool: {name}")
 
@@ -90,6 +100,7 @@ def main(
             # Initialize tools before server starts
             searxng_tool = SearxNGSearchTool()
             crawl4ai_tool = Crawl4AITool()
+            youtube_tool = YouTubeTranscriptTool()
 
             async with stdio_server() as (read, write):
                 # Initialize with required options
@@ -114,6 +125,8 @@ def main(
                 await searxng_tool.close()
             if crawl4ai_tool:
                 await crawl4ai_tool.close()
+            if youtube_tool:
+                await youtube_tool.close()
 
     return anyio.run(arun)
 
