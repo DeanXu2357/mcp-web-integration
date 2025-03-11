@@ -18,7 +18,7 @@ class SearxNGSearcher:
             api_params = {
                 "q": params.query,
                 "format": "json",
-                "pageno": 1,
+                "pageno": params.page,
             }
             
             if params.time_range:

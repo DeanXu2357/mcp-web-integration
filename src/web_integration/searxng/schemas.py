@@ -10,6 +10,11 @@ class SearchParams(BaseModel):
         default=None,
         description="Time range for search results",
     )
+    page: Optional[int] = Field(
+        default=1,
+        ge=1,
+        description="Page number for pagination"
+    )
 
 class SearchResult(BaseModel):
     """Single search result from SearxNG."""

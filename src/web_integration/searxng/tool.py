@@ -45,6 +45,12 @@ class SearxNGSearchTool:
                         "description": "Time range filter. Filter data from selected time range to now",
                         "enum": ["day", "week", "month", "year"],
                     },
+                    "page": {
+                        "type": "number",
+                        "description": "Page number (starts from 1)",
+                        "default": 1,
+                        "minimum": 1,
+                    },
                 },
             },
         )
