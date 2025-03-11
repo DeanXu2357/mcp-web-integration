@@ -95,7 +95,7 @@ def main(
         os.environ["CRAWL4AI_API_TOKEN"] = crawl4ai_token
 
     async def arun():
-        global searxng_tool, crawl4ai_tool
+        global searxng_tool, crawl4ai_tool, youtube_tool
         try:
             # Initialize tools before server starts
             searxng_tool = SearxNGSearchTool()
