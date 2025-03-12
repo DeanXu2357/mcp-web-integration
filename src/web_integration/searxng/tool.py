@@ -33,13 +33,6 @@ class SearxNGSearchTool:
                         "type": "string",
                         "description": "Search query string",
                     },
-                    "limit": {
-                        "type": "number",
-                        "description": "Number of results (1-50, default 3)",
-                        "default": 3,
-                        "minimum": 1,
-                        "maximum": 50,
-                    },
                     "time_range": {
                         "type": "string",
                         "description": "Time range filter. Filter data from selected time range to now",

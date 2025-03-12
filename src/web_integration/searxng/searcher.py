@@ -33,7 +33,7 @@ class SearxNGSearcher:
 
             # Extract and format results
             results: List[SearchResult] = []
-            for result in data.get("results", [])[:params.limit]:
+            for result in data.get("results", []):
                 try:
                     results.append(
                         SearchResult(

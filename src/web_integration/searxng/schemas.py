@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field, HttpUrl
 class SearchParams(BaseModel):
     """Search parameters for SearxNG."""
     query: str = Field(..., description="Search query string")
-    limit: int = Field(default=3, ge=1, le=50, description="Number of results to return")
     time_range: Optional[str] = Field(
         default=None,
         description="Time range for search results",
