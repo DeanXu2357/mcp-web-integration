@@ -24,7 +24,7 @@ class SearxNGSearchTool:
         """Get tool definition."""
         return Tool(
             name="searxng_search",
-            description="Search the web using SearxNG",
+            description="search the web using searXNG. This will aggregate the results from google, bing, brave, duckduckgo and many others. Use this to find information on the web. Even if you do not have access to the internet, you can still use this tool to search the web.",
             inputSchema={
                 "type": "object",
                 "required": ["query"],
