@@ -28,14 +28,16 @@ Web content extraction using Crawl4AI. Features include:
 
 ## Configuration
 
+Note: In the configuration below, replace `/path/to/project` with your actual project directory path.
+
 ```json
 {
   "mcpServers": {
     "web-integration": {
       "command": "uv",
-      "args": ["-p", "@executeautomation/mcp-web-integration", "run", "mcp-web-integration"],
+      "args": ["--project", "/path/to/project", "run", "mcp-web-integration"],
       "env": {
-        "SEARXNG_URL": "YOUR_SEARXNG_INSTANCE_URL",
+        "SEARXNG_URL": "https://your.searxng.instance.url",
         "CRAWL4AI_URL": "http://localhost:11235",
         "CRAWL4AI_API_TOKEN": "YOUR_API_TOKEN",
         "CRAWL4AI_HEADLESS": "true",
@@ -51,19 +53,19 @@ Web content extraction using Crawl4AI. Features include:
 ### Configuration Options
 
 #### SearxNG Options
-| Environment Variable | Description | Default |
-|---------------------|-------------|---------|
-| `SEARXNG_URL` | SearxNG instance URL | Required |
+| Environment Variable | Description          | Default  |
+| -------------------- | -------------------- | -------- |
+| `SEARXNG_URL`        | SearxNG instance URL (must be a valid URL starting with http:// or https://) | Required |
 
 #### Crawl4AI Options
-| Environment Variable | Description | Default |
-|---------------------|-------------|---------|
-| `CRAWL4AI_URL` | Crawl4AI server URL | http://localhost:11235 |
-| `CRAWL4AI_API_TOKEN` | API token for authentication | Required |
-| `CRAWL4AI_HEADLESS` | Run browser in headless mode | true |
-| `CRAWL4AI_VERBOSE` | Enable verbose logging | false |
-| `CRAWL4AI_WORD_COUNT_THRESHOLD` | Minimum word count for content | 10 |
-| `CRAWL4AI_TIMEOUT` | Request timeout in seconds | 300 |
+| Environment Variable            | Description                    | Default                |
+| ------------------------------- | ------------------------------ | ---------------------- |
+| `CRAWL4AI_URL`                  | Crawl4AI server URL (must be a valid URL starting with http:// or https://)            | http://localhost:11235 |
+| `CRAWL4AI_API_TOKEN`            | API token for authentication   | Required               |
+| `CRAWL4AI_HEADLESS`             | Run browser in headless mode   | true                   |
+| `CRAWL4AI_VERBOSE`              | Enable verbose logging         | false                  |
+| `CRAWL4AI_WORD_COUNT_THRESHOLD` | Minimum word count for content | 10                     |
+| `CRAWL4AI_TIMEOUT`              | Request timeout in seconds     | 300                    |
 
 ## Development
 
@@ -90,4 +92,3 @@ npx -y @modelcontextprotocol/inspector uv run mcp-web-integration \
   --crawl4ai-url YOUR_CRAWL4AI_URL \
   --crawl4ai-token YOUR_API_TOKEN
 ```
-
