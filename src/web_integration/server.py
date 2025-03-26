@@ -4,7 +4,7 @@ import anyio
 import click
 import os
 import sys
-from typing import Sequence
+from typing import Sequence, Optional
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 from mcp.server.models import InitializationOptions
@@ -16,8 +16,8 @@ from web_integration.searxng import SearxNGSearchTool
 from web_integration.crawl4ai import Crawl4AITool
 
 # Global instances for tools
-searxng_tool = None
-crawl4ai_tool = None
+searxng_tool: Optional[SearxNGSearchTool] = None
+crawl4ai_tool: Optional[Crawl4AITool] = None
 
 # Initialize server with name
 app = Server("mcp-web-integration")
@@ -26,6 +26,7 @@ app = Server("mcp-web-integration")
 @app.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
     """Handle list tools request."""
+    print("[INFO] Handling list tools request", file=sys.stderr)
     tools = []
     if searxng_tool:
         tools.append(searxng_tool.tool_definition)
@@ -36,23 +37,29 @@ async def handle_list_tools() -> list[types.Tool]:
 
 @app.call_tool()
 async def handle_call_tool(name: str, arguments: dict | None) -> types.CallToolResult:
+    """Handle tool call request."""
+    print(f"[INFO] Handling tool call: {name}", file=sys.stderr)
+    
     if arguments is None:
         arguments = {}
 
-    """Handle tool call request."""
     if name == "searxng_search" and searxng_tool:
         if not arguments or "query" not in arguments:
             error_msg = "Missing required parameter: 'query'"
-            raise ValueError(f"{error_msg}")
+            print(f"[ERROR] {error_msg}", file=sys.stderr)
+            raise ValueError(error_msg)
         return await searxng_tool.handle_request(name, arguments)
 
     if name == "crawl4ai_extract" and crawl4ai_tool:
         if not arguments or "url" not in arguments:
             error_msg = "Missing required parameter: 'url'"
-            raise ValueError(f"{error_msg}")
+            print(f"[ERROR] {error_msg}", file=sys.stderr)
+            raise ValueError(error_msg)
         return await crawl4ai_tool.handle_request(name, arguments)
 
-    raise ValueError(f"Unknown tool: {name}")
+    error_msg = f"Unknown tool: {name}"
+    print(f"[ERROR] {error_msg}", file=sys.stderr)
+    raise ValueError(error_msg)
 
 
 @click.command()
@@ -85,13 +92,18 @@ def main(
         os.environ["CRAWL4AI_API_TOKEN"] = crawl4ai_token
 
     async def arun():
-        global searxng_tool, crawl4ai_tool
+        """Run the server with basic error handling."""
+        print("[INFO] Starting MCP Web Integration server", file=sys.stderr)
+        
         try:
             # Initialize tools before server starts
+            print("[INFO] Initializing tools...", file=sys.stderr)
+            global searxng_tool, crawl4ai_tool
             searxng_tool = SearxNGSearchTool()
             crawl4ai_tool = Crawl4AITool()
+            print("[INFO] Tools initialized successfully", file=sys.stderr)
+
             async with stdio_server() as (read, write):
-                # Initialize with required options
                 init_options = InitializationOptions(
                     server_name="mcp-web-integration",
                     server_version="0.1.0",
@@ -99,20 +111,25 @@ def main(
                         tools=types.ToolsCapability(listChanged=False)
                     ),
                 )
-                await app.run(
-                    read,
-                    write,
-                    init_options,
-                )
+                await app.run(read, write, init_options)
             return 0
+            
         except Exception as e:
-            print(f"Error: {e}", file=sys.stderr)
+            print(f"[ERROR] Server error: {str(e)}", file=sys.stderr)
             return 1
+            
         finally:
+            print("[INFO] Server shutting down...", file=sys.stderr)
             if searxng_tool:
-                await searxng_tool.close()
+                try:
+                    await searxng_tool.close()
+                except Exception as e:
+                    print(f"[ERROR] Failed to close SearxNG tool: {e}", file=sys.stderr)
             if crawl4ai_tool:
-                await crawl4ai_tool.close()
+                try:
+                    await crawl4ai_tool.close()
+                except Exception as e:
+                    print(f"[ERROR] Failed to close Crawl4AI tool: {e}", file=sys.stderr)
 
     return anyio.run(arun)
 

@@ -1,4 +1,5 @@
 """YouTube transcript extraction functionality."""
+import sys
 from typing import List
 import re
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
@@ -41,20 +42,30 @@ class YouTubeTranscriptExtractor:
             TranscriptsDisabled: If transcripts are disabled for the video
             NoTranscriptFound: If no transcript is available
         """
-        video_id = self._extract_video_id(url)
+        print(f"[INFO] Getting transcript for URL: {url}", file=sys.stderr)
+        
+        try:
+            video_id = self._extract_video_id(url)
+        except ValueError as e:
+            print(f"[ERROR] Failed to extract video ID: {str(e)}", file=sys.stderr)
+            raise
+
         language = language or self.config.default_language
+        print(f"[INFO] Using language: {language}", file=sys.stderr)
 
         try:
+            print(f"[INFO] Fetching transcript list for video: {video_id}", file=sys.stderr)
             transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
             
             try:
-                # Try to get transcript in requested language
+                print(f"[INFO] Attempting to get transcript in {language}", file=sys.stderr)
                 transcript = transcript_list.find_transcript([language])
             except NoTranscriptFound:
-                # Fall back to auto-translated version if available
+                print(f"[INFO] No transcript found in {language}, trying auto-translation", file=sys.stderr)
                 transcript = transcript_list.find_manually_created_transcript()
                 transcript = transcript.translate(language)
 
+            print("[INFO] Fetching transcript segments", file=sys.stderr)
             segments = transcript.fetch()
             
             # Convert to our schema format
@@ -69,6 +80,7 @@ class YouTubeTranscriptExtractor:
 
             # Combine all text for full transcript
             full_text = ' '.join(segment['text'] for segment in segments)
+            print(f"[INFO] Successfully extracted transcript with {len(segments)} segments", file=sys.stderr)
 
             return TranscriptResponse(
                 text=full_text,
@@ -77,5 +89,10 @@ class YouTubeTranscriptExtractor:
             )
 
         except (TranscriptsDisabled, NoTranscriptFound) as e:
-            # Re-raise with more context
-            raise type(e)(f"Failed to get transcript for video {video_id}: {str(e)}")
+            error_msg = f"Failed to get transcript for video {video_id}: {str(e)}"
+            print(f"[ERROR] {error_msg}", file=sys.stderr)
+            raise type(e)(error_msg)
+        except Exception as e:
+            error_msg = f"Unexpected error getting transcript: {str(e)}"
+            print(f"[ERROR] {error_msg}", file=sys.stderr)
+            raise RuntimeError(error_msg)
