@@ -26,11 +26,11 @@ class Crawl4AICrawler:
     def _build_request_data(self, params: CrawlParams) -> Dict[str, Any]:
         """Build request data from params and config."""
         print(f"[INFO] Building request data for URL: {params.url}", file=sys.stderr)
-        
+
         request_data = {
             "urls": params.url,
             "priority": 5,
-            "cache_mode": params.cache_mode or "enabled",
+            "cache_mode": params.cache_mode,  # Default is already set in Pydantic model
             "crawler_params": {
                 "headless": self.config.headless,
                 "verbose": self.config.verbose,
@@ -77,7 +77,7 @@ class Crawl4AICrawler:
             results=[
                 CrawlResult(
                     url=url,
-                    content="",
+                    content="Error occurred while crawling",  # More descriptive default content
                     status="failed",
                     success=False,
                     error=error,
@@ -100,7 +100,7 @@ class Crawl4AICrawler:
                 headers=self.headers,
                 timeout=params.timeout or self.config.timeout,
             )
-            
+
             try:
                 response.raise_for_status()
             except httpx.HTTPStatusError as e:
@@ -121,11 +121,14 @@ class Crawl4AICrawler:
                 print(f"[ERROR] Response validation failed: {e}", file=sys.stderr)
                 return self._build_error_response(params.url, str(e))
 
-            print("[INFO] Successfully extracted and validated crawl results", file=sys.stderr)
+            print(
+                "[INFO] Successfully extracted and validated crawl results",
+                file=sys.stderr,
+            )
             results = [
                 CrawlResult(
                     url=params.url,
-                    content=data["result"]["markdown"],
+                    content=data["result"]["markdown"] or "",  # Ensure content is never None
                     status="completed",
                     success=data["result"]["success"],
                     error=data.get("error"),
@@ -156,17 +159,17 @@ class Crawl4AICrawler:
             error_msg = f"Request timeout: {str(e)}"
             print(f"[ERROR] {error_msg}", file=sys.stderr)
             return self._build_error_response(params.url, error_msg)
-        
+
         except httpx.TransportError as e:
             error_msg = f"HTTP/2 transport error: {str(e)}"
             print(f"[ERROR] {error_msg}", file=sys.stderr)
             return self._build_error_response(params.url, error_msg)
-        
+
         except httpx.RequestError as e:
             error_msg = f"Request failed: {str(e)}"
             print(f"[ERROR] {error_msg}", file=sys.stderr)
             return self._build_error_response(params.url, error_msg)
-        
+
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
             print(f"[ERROR] {error_msg}", file=sys.stderr)

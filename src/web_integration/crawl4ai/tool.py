@@ -94,7 +94,11 @@ class Crawl4AITool:
                         ]
                     )
 
-            return [types.TextContent(text="\n\n" + "\n".join(result_texts), type="text")]
+            return [
+                types.TextContent(
+                    text="\n\n" + "\n".join(result_texts), type="text"
+                ).model_dump(exclude_unset=True)
+            ]
 
         except Exception as e:
             return [types.TextContent(text=f"Crawl failed: {str(e)}", type="text")]
